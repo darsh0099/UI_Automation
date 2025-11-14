@@ -1,0 +1,55 @@
+name: Run Cucumber Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        java-version: ['17']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Run Maven Clean Install
+      run: mvn clean install -DskipTests
+
+    - name: Run Cucumber Tests
+      run: mvn test
+
+    - name: Upload Screenshots
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-screenshots
+        path: target/screenshots/
+        retention-days: 30
+
+    - name: Upload Test Reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: target/surefire-reports/
+        retention-days: 30
+
+    - name: Publish Test Report
+      if: always()
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        files: target/surefire-reports/TEST-*.xml
+        check_name: Cucumber Test Results
