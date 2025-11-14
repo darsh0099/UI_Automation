@@ -1,0 +1,5 @@
+url: "https://practicetestautomation.com/practice-test-login/"
+browser: "chrome"
+username: "student"
+password: "Password123"
+screenshot_path: "target/screenshots/"
